@@ -16,7 +16,7 @@ npm install
 npm run dev
 ```
 
-Ouvrez votre navigateur à : **http://localhost:5173/configurator?model=nebula**
+Ouvrez votre navigateur à : **http://localhost:5173/configurator?model=jersey_mx**
 
 ### Build pour production
 
@@ -141,8 +141,10 @@ AWS_BUCKET=your-bucket
 
 #### Modèles 3D
 Placez vos fichiers GLB dans `public/assets/models/` :
-- `nebula.glb` (exemple)
-- Les meshes doivent être nommés : `front`, `back`, `sleeve_left`, `sleeve_right`, `collar`
+- `jersey_mx.glb` (exemple)
+- **Important** : Le système utilise les **matériaux** plutôt que les meshes
+- Les matériaux doivent être nommés : `front`, `back`, `sleeve_left`, `sleeve_right`
+- Voir [NOTICE_MATERIALS.md](./NOTICE_MATERIALS.md) pour plus de détails
 
 #### UV Overlays
 Placez les images UV dans `public/assets/uv_overlays/` :
@@ -326,7 +328,8 @@ export default async function handler(req, res) {
 
 - Vérifier que `public/assets/models/${modelId}.glb` existe
 - Vérifier console pour erreurs de chargement
-- Vérifier que les meshes ont les bons noms
+- Vérifier que les **matériaux** ont les bons noms (pas les meshes)
+- Vérifier que `jersey_mx.config.json` mappe correctement les matériaux
 
 ### Les textures ne s'appliquent pas
 

@@ -16,7 +16,7 @@ const POSITION_OPTIONS = [
   { partId: 'front', label: 'Poitrine', xPercent: 50, yPercent: 30 },
 ]
 
-export default function NameTab() {
+export default function NameTab({ sceneManagerRef }) {
   const dispatch = useDispatch()
   const parts = useSelector((state) => state.configurator.parts)
 
@@ -37,25 +37,29 @@ export default function NameTab() {
 
     const position = POSITION_OPTIONS.find((p) => p.partId === selectedPartId)
     
+    const textConfig = {
+      value: text.trim(),
+      fontFamily,
+      fontSize,
+      color,
+      stroke: strokeEnabled ? {
+        color: strokeColor,
+        width: strokeWidth,
+      } : null,
+      xPercent: position?.xPercent || 50,
+      yPercent: position?.yPercent || 50,
+    }
+    
+    console.log('Adding text to', selectedPartId, ':', textConfig)
+    
     dispatch(setPartText({
       partId: selectedPartId,
-      text: {
-        value: text.trim(),
-        fontFamily,
-        fontSize,
-        color,
-        stroke: strokeEnabled ? {
-          color: strokeColor,
-          width: strokeWidth,
-        } : null,
-        xPercent: position?.xPercent || 50,
-        yPercent: position?.yPercent || 50,
-      },
+      text: textConfig,
     }))
 
     // Reset form
     setText('')
-    alert('Texte ajouté avec succès')
+    console.log('Text added, sceneVersion should increment')
   }
 
   const handleRemove = () => {

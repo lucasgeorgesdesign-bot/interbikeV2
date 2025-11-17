@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { setModel } from '../store/configuratorSlice.js'
@@ -14,16 +14,23 @@ export default function ConfiguratorPage() {
   const dispatch = useDispatch()
   const configuratorState = useSelector((state) => state.configurator)
   const { modelId, parts = {}, sceneVersion = 0 } = configuratorState || {}
+  const sceneManagerRef = useRef(null)
 
-  // Parse model query param and initialize
+  // Parse model and design from URL
   useEffect(() => {
-    const model = searchParams.get('model') || 'nebula'
+    const model = searchParams.get('model') || 'jersey_mx'
+    const design = searchParams.get('design') || null
     
     if (model !== modelId) {
       // Get default part IDs for this model
       const partIds = modelLoader.getDefaultPartIds(model)
       
       dispatch(setModel({ modelId: model, partIds }))
+    }
+    
+    // Log design selection (on implémentera setDesign plus tard)
+    if (design) {
+      console.log('Design sélectionné:', design)
     }
   }, [searchParams, modelId, dispatch])
 
@@ -46,12 +53,13 @@ export default function ConfiguratorPage() {
     <div className="configurator-page">
       <div className="configurator-canvas">
         <SceneManager
+          ref={sceneManagerRef}
           modelId={modelId}
           parts={parts}
           sceneVersion={sceneVersion}
         />
       </div>
-      <Sidebar />
+      <Sidebar sceneManagerRef={sceneManagerRef} />
     </div>
   )
 }

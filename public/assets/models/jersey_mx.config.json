@@ -1,0 +1,47 @@
+{
+  "modelId": "jersey_mx",
+  "name": "Jersey MX",
+  "zones": [
+    {
+      "partId": "front",
+      "label": "Torse",
+      "type": "colorable",
+      "canHaveLogo": true,
+      "canHaveText": true,
+      "meshName": "front"
+    },
+    {
+      "partId": "back",
+      "label": "Dos",
+      "type": "colorable",
+      "canHaveLogo": true,
+      "canHaveText": true,
+      "meshName": "back"
+    },
+    {
+      "partId": "sleeve_left",
+      "label": "Bras gauche",
+      "type": "colorable",
+      "canHaveLogo": true,
+      "meshName": "sleeve_left"
+    },
+    {
+      "partId": "sleeve_right",
+      "label": "Bras droit",
+      "type": "colorable",
+      "canHaveLogo": true,
+      "meshName": "sleeve_right"
+    }
+  ],
+  "designs": [
+    {
+      "id": "camouflage",
+      "name": "Camouflage",
+      "baseTextures": {
+        "front": "/assets/designs/camouflage/front_base.png"
+      },
+      "modifiableElements": []
+    }
+  ]
+}
+

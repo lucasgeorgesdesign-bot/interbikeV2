@@ -88,12 +88,13 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
   canvas.backgroundColor = partCfg.color || '#ffffff'
   canvas.renderAll()
 
-  // Step 2: Draw background image if any
-  if (partCfg.imageUrl) {
+  // Step 2: Draw background texture/image if any (base texture from design or user image)
+  const backgroundImageUrl = partCfg.textureUrl || partCfg.imageUrl
+  if (backgroundImageUrl) {
     try {
       const bgImg = await new Promise((resolve, reject) => {
         fabric.Image.fromURL(
-          partCfg.imageUrl,
+          backgroundImageUrl,
           (img) => {
             if (!img) {
               reject(new Error('Failed to load background image'))
@@ -137,8 +138,9 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
     }
   }
 
-  // Step 3: Draw logo if provided
-  if (partCfg.logoId || partCfg.imageUrl) {
+  // Step 3: Draw logo if provided (user-uploaded logo, not base texture)
+  // Only draw logo if it's not the same as the background texture
+  if (partCfg.logoId || (partCfg.imageUrl && partCfg.imageUrl !== backgroundImageUrl)) {
     const logoUrl = partCfg.imageUrl || `/assets/logos_catalog/${partCfg.logoId}.svg`
     
     try {
@@ -177,6 +179,7 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
   // Step 4: Draw text if provided
   if (partCfg.text && partCfg.text.value) {
     const textCfg = partCfg.text
+    console.log('📝 Composing text:', textCfg.value, 'at', textCfg.xPercent, textCfg.yPercent)
     
     // Load font if specified
     if (textCfg.fontFamily && textCfg.fontFamily !== 'Arial') {
@@ -206,21 +209,17 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
     
     canvas.add(text)
     canvas.renderAll()
+    console.log('✅ Text added to canvas')
   }
 
   // Step 5: Draw number if provided
   if (partCfg.number && partCfg.number.value) {
     const numCfg = partCfg.number
+    console.log('🔢 Composing number:', numCfg.value, 'at', numCfg.xPercent, numCfg.yPercent)
     
-    // Position mapping
-    const positionMap = {
-      dos: { x: 50, y: 20 }, // Back top
-      face: { x: 50, y: 30 }, // Front chest
-      bra_d: { x: 50, y: 50 }, // Right sleeve
-      bra_g: { x: 50, y: 50 }, // Left sleeve
-    }
-    
-    const position = positionMap[numCfg.positionKey] || { x: 50, y: 50 }
+    // Use UV coordinates if provided, otherwise use default position
+    const xPercent = numCfg.xPercent !== undefined ? numCfg.xPercent : 50
+    const yPercent = numCfg.yPercent !== undefined ? numCfg.yPercent : 50
     
     // Load font if specified
     if (numCfg.fontFamily && numCfg.fontFamily !== 'Arial') {
@@ -230,8 +229,8 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
     }
     
     const number = new fabric.Text(numCfg.value.toString(), {
-      left: position.x * width / 100,
-      top: position.y * height / 100,
+      left: xPercent * width / 100,
+      top: yPercent * height / 100,
       fontSize: numCfg.size || 72,
       fill: numCfg.color || '#000000',
       fontFamily: numCfg.fontFamily || 'Arial',
@@ -243,6 +242,7 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
     
     canvas.add(number)
     canvas.renderAll()
+    console.log('✅ Number added to canvas')
   }
 
   // Step 6: Apply UV overlay (optional, for debug)

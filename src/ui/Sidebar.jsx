@@ -14,7 +14,7 @@ const TABS = [
   { id: 'logos', label: 'Logo', component: LogosTab },
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ sceneManagerRef }) {
   const [activeTab, setActiveTab] = useState('design')
 
   const ActiveComponent = TABS.find((tab) => tab.id === activeTab)?.component || DesignTab
@@ -36,7 +36,7 @@ export default function Sidebar() {
         ))}
       </div>
       <div className="sidebar-content">
-        <ActiveComponent />
+        <ActiveComponent sceneManagerRef={sceneManagerRef} />
       </div>
     </div>
   )
