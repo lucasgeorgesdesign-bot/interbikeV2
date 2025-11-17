@@ -274,8 +274,22 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
     }
     
     canvas.add(text)
+    // Ensure text is on top (bring to front)
+    canvas.bringToFront(text)
     canvas.renderAll()
-    console.log('✅ Text added to canvas')
+    
+    // Log text position for debugging
+    console.log('✅ Text added to canvas:', {
+      value: textCfg.value,
+      position: { x: clampedXPercent, y: clampedYPercent },
+      pixelPosition: { 
+        left: clampedXPercent * width / 100, 
+        top: clampedYPercent * height / 100 
+      },
+      fontSize: textCfg.fontSize || 48,
+      color: textCfg.color || '#000000',
+      canvasSize: { width, height },
+    })
   }
 
   // Step 5: Draw number if provided
@@ -317,8 +331,22 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
     })
     
     canvas.add(number)
+    // Ensure number is on top (bring to front)
+    canvas.bringToFront(number)
     canvas.renderAll()
-    console.log('✅ Number added to canvas')
+    
+    // Log number position for debugging
+    console.log('✅ Number added to canvas:', {
+      value: numCfg.value,
+      position: { x: xPercent, y: yPercent },
+      pixelPosition: { 
+        left: xPercent * width / 100, 
+        top: yPercent * height / 100 
+      },
+      fontSize: numCfg.size || 72,
+      color: numCfg.color || '#000000',
+      canvasSize: { width, height },
+    })
   }
 
   // Step 6: Apply UV overlay (optional, for debug only)
