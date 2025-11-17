@@ -323,9 +323,21 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
 
   // Step 6: Apply UV overlay (optional, for debug only)
   // UV overlays are completely optional and only used for visual debugging
+  // Skip silently if they don't exist to avoid console errors
   if (uvOverlay && typeof uvOverlay === 'string' && uvOverlay.trim() !== '') {
+    // Check if file exists first (HEAD request) to avoid Fabric.js errors
     try {
-      // Try to load UV overlay, but don't fail if it doesn't exist
+      const exists = await fetch(uvOverlay, { method: 'HEAD' })
+        .then(res => res.ok)
+        .catch(() => false)
+      
+      if (!exists) {
+        // File doesn't exist, skip silently (UV overlays are optional)
+        // Don't log anything to avoid console noise
+        return
+      }
+      
+      // File exists, try to load it
       const overlayImg = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
           reject(new Error('UV overlay load timeout'))

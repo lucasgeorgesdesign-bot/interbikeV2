@@ -28,13 +28,25 @@ export default function ElementEditor({ selectedElement, onClose, sceneManagerRe
   if (!selectedElement) return null
 
   const handleUpdate = () => {
+    // Clamp xPercent and yPercent to valid range [0, 100]
+    const clampedX = Math.max(0, Math.min(100, parseFloat(xPercent) || selectedElement.xPercent || 50))
+    const clampedY = Math.max(0, Math.min(100, parseFloat(yPercent) || selectedElement.yPercent || 50))
+    
     // Preserve all existing properties and only update changed ones
     const update = {
       ...selectedElement, // Preserve all original properties (value, fontFamily, stroke, etc.)
       fontSize: fontSize || selectedElement.fontSize,
       color: color || selectedElement.color,
-      xPercent: parseFloat(xPercent) || selectedElement.xPercent || 50,
-      yPercent: parseFloat(yPercent) || selectedElement.yPercent || 50,
+      xPercent: clampedX,
+      yPercent: clampedY,
+    }
+    
+    // Warn if values were clamped
+    if (xPercent !== clampedX || yPercent !== clampedY) {
+      console.warn('⚠️ Position values clamped in ElementEditor:', {
+        original: { x: xPercent, y: yPercent },
+        clamped: { x: clampedX, y: clampedY },
+      })
     }
 
     console.log('✏️ Updating element:', {
