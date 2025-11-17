@@ -195,8 +195,10 @@ async function applyConfigToSceneImmediate(scene, partMap, parts, modelId, onPro
     }
 
     completed++
-    if (onProgress) onProgress(completed, partIds.length)
+    if (onProgress) onProgress(completed, allPartIds.length)
   }
+  
+  console.log(`✅ Finished applying config: ${completed}/${allPartIds.length} parts processed`)
 }
 
 // Export disposeScene for use in SceneManager

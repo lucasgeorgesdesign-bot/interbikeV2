@@ -276,18 +276,29 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
   }
 
   // Convert to blob
+  // Fabric.js canvas doesn't have toBlob directly, use getElement() to get native canvas
   const blob = await new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          resolve(blob)
-        } else {
-          reject(new Error('Failed to create blob'))
-        }
-      },
-      'image/png',
-      quality
-    )
+    const nativeCanvas = canvas.getElement()
+    if (nativeCanvas && nativeCanvas.toBlob) {
+      nativeCanvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob)
+          } else {
+            reject(new Error('Failed to create blob'))
+          }
+        },
+        'image/png',
+        quality
+      )
+    } else {
+      // Fallback: use toDataURL and convert to blob
+      const dataUrl = canvas.toDataURL('image/png', quality)
+      fetch(dataUrl)
+        .then(res => res.blob())
+        .then(blob => resolve(blob))
+        .catch(err => reject(err))
+    }
   })
 
   return { blob, canvas: canvas.getElement() }
