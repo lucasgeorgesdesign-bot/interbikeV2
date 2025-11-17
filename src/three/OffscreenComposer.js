@@ -87,6 +87,15 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
   // Step 1: Fill with base color
   canvas.backgroundColor = partCfg.color || '#ffffff'
   canvas.renderAll()
+  
+  console.log('🎨 Canvas initialized:', {
+    size: { width, height },
+    backgroundColor: canvas.backgroundColor,
+    hasNumber: !!(partCfg.number && partCfg.number.value),
+    hasText: !!(partCfg.text && partCfg.text.value),
+    hasLogo: !!(partCfg.logoId || partCfg.imageUrl),
+    hasBackgroundTexture: !!(partCfg.textureUrl || partCfg.imageUrl),
+  })
 
   // Step 2: Draw background texture/image if any (base texture from design or user image)
   const backgroundImageUrl = partCfg.textureUrl || partCfg.imageUrl
