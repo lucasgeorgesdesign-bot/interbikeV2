@@ -143,29 +143,61 @@ export default function ElementEditor({ selectedElement, onClose, sceneManagerRe
         />
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
-        <button className="primary-button" onClick={handleUpdate}>
-          Appliquer
+      <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
+        <button 
+          className="primary-button" 
+          onClick={() => {
+            console.log('🔄 Applying update...')
+            handleUpdate()
+            // Force a small delay to ensure Redux state is updated
+            setTimeout(() => {
+              console.log('✅ Update applied, sceneVersion should increment')
+            }, 100)
+          }}
+        >
+          ✅ Appliquer
         </button>
-        <button className="secondary-button" onClick={() => {
-          if (sceneManagerRef?.current) {
-            sceneManagerRef.current.enableUVEditing(
-              (clickedPartId, uvCoords) => {
-                if (clickedPartId === selectedElement.partId) {
-                  setXPercent(uvCoords.xPercent)
-                  setYPercent(uvCoords.yPercent)
-                  handleUpdate()
-                }
-              },
-              null
-            )
-          }
-        }}>
+        <button 
+          className="secondary-button" 
+          onClick={() => {
+            if (sceneManagerRef?.current) {
+              console.log('📍 Enabling UV editing mode for placement')
+              sceneManagerRef.current.focusOnPart(selectedElement.partId)
+              
+              setTimeout(() => {
+                sceneManagerRef.current.enableUVEditing(
+                  (clickedPartId, uvCoords) => {
+                    console.log('📍 Clicked on part:', clickedPartId, 'UV:', uvCoords)
+                    if (clickedPartId === selectedElement.partId) {
+                      setXPercent(uvCoords.xPercent)
+                      setYPercent(uvCoords.yPercent)
+                      // Auto-apply after placement
+                      setTimeout(() => {
+                        handleUpdate()
+                      }, 100)
+                    }
+                  },
+                  null
+                )
+              }, 1200)
+            } else {
+              console.warn('⚠️ sceneManagerRef not available')
+            }
+          }}
+        >
           📍 Placer sur modèle
         </button>
         <button className="remove-button-small" onClick={handleDelete}>
-          Supprimer
+          🗑️ Supprimer
         </button>
+      </div>
+      
+      <div style={{ marginTop: '12px', padding: '8px', backgroundColor: '#f0f0f0', borderRadius: '4px', fontSize: '12px' }}>
+        <strong>Debug:</strong>
+        <div>PartId: {selectedElement.partId}</div>
+        <div>Type: {selectedElement.type}</div>
+        <div>Value: {selectedElement.value}</div>
+        <div>Position: X={xPercent}%, Y={yPercent}%</div>
       </div>
     </div>
   )
