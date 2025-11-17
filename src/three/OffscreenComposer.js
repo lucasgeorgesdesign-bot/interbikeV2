@@ -93,24 +93,39 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
   if (backgroundImageUrl) {
     console.log('🖼️ Loading background texture:', backgroundImageUrl)
     try {
+      // First, verify the image exists by trying to fetch it
+      const imageExists = await fetch(backgroundImageUrl, { method: 'HEAD' })
+        .then(res => res.ok)
+        .catch(() => false)
+      
+      if (!imageExists) {
+        console.warn(`⚠️ Background image not found: ${backgroundImageUrl}`)
+        // Try alternative path (without leading slash)
+        const altPath = backgroundImageUrl.startsWith('/') 
+          ? backgroundImageUrl.substring(1) 
+          : `/${backgroundImageUrl}`
+        console.log(`   Trying alternative path: ${altPath}`)
+      }
+      
       const bgImg = await new Promise((resolve, reject) => {
         const timeout = setTimeout(() => {
-          reject(new Error('Background image load timeout'))
-        }, 5000)
+          reject(new Error(`Background image load timeout after 10s: ${backgroundImageUrl}`))
+        }, 10000) // Increased timeout
         
         fabric.Image.fromURL(
           backgroundImageUrl,
           (img) => {
             clearTimeout(timeout)
             if (!img) {
-              reject(new Error('Failed to load background image'))
+              reject(new Error('Failed to load background image - fabric returned null'))
               return
             }
             
-            console.log('✅ Background image loaded:', {
+            console.log('✅ Background image loaded successfully:', {
               width: img.width,
               height: img.height,
-              url: backgroundImageUrl
+              url: backgroundImageUrl,
+              element: img.getElement(),
             })
             
             // Apply repeat if specified
@@ -129,32 +144,53 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
                 }
               }
             } else {
-              // Single image, scale to fit canvas
+              // Single image, scale to fit canvas exactly
+              const scaleX = width / (img.width || width)
+              const scaleY = height / (img.height || height)
+              
               img.set({
                 left: 0,
                 top: 0,
-                scaleX: width / (img.width || width),
-                scaleY: height / (img.height || height),
+                scaleX: scaleX,
+                scaleY: scaleY,
                 originX: 'left',
                 originY: 'top',
               })
+              
               canvas.add(img)
               canvas.sendToBack(img) // Ensure background is behind everything
+              
+              console.log('✅ Background image positioned:', {
+                left: img.left,
+                top: img.top,
+                scaleX: img.scaleX,
+                scaleY: img.scaleY,
+                width: img.width * img.scaleX,
+                height: img.height * img.scaleY,
+              })
             }
             
             canvas.renderAll()
             resolve(img)
           },
-          { crossOrigin: 'anonymous' }
+          { 
+            crossOrigin: 'anonymous',
+            // Add error callback
+          }
         )
       })
       console.log('✅ Background texture added to canvas')
     } catch (error) {
-      console.error('❌ Failed to load background image:', error, backgroundImageUrl)
+      console.error('❌ Failed to load background image:', {
+        error: error.message,
+        url: backgroundImageUrl,
+        stack: error.stack,
+      })
       // Don't fail completely, continue without background
+      // But log the error clearly
     }
   } else {
-    console.log('ℹ️ No background texture for this part')
+    console.log('ℹ️ No background texture URL for this part')
   }
 
   // Step 3: Draw logo if provided (user-uploaded logo, not base texture)

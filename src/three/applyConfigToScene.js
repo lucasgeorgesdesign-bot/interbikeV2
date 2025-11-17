@@ -84,6 +84,14 @@ async function applyConfigToSceneImmediate(scene, partMap, parts, modelId, onPro
   const modelConfig = await modelLoader.loadModelConfig(modelId)
   const currentDesign = modelConfig?.designs?.[0] // Pour l'instant, prendre le premier design (camouflage)
   
+  console.log('📋 Model config loaded:', {
+    hasConfig: !!modelConfig,
+    hasDesigns: !!modelConfig?.designs,
+    designsCount: modelConfig?.designs?.length || 0,
+    currentDesign: currentDesign?.id || 'none',
+    baseTextures: currentDesign?.baseTextures || {},
+  })
+  
   // Get all partIds from both partMap (meshes in GLB) and parts (Redux state)
   // This ensures we process all parts even if some meshes are missing
   const partMapIds = Array.from(partMap.keys())

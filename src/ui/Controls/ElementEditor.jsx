@@ -28,24 +28,33 @@ export default function ElementEditor({ selectedElement, onClose, sceneManagerRe
   if (!selectedElement) return null
 
   const handleUpdate = () => {
+    // Preserve all existing properties and only update changed ones
     const update = {
-      ...selectedElement,
-      fontSize,
-      color,
-      xPercent: parseFloat(xPercent),
-      yPercent: parseFloat(yPercent),
+      ...selectedElement, // Preserve all original properties (value, fontFamily, stroke, etc.)
+      fontSize: fontSize || selectedElement.fontSize,
+      color: color || selectedElement.color,
+      xPercent: parseFloat(xPercent) || selectedElement.xPercent || 50,
+      yPercent: parseFloat(yPercent) || selectedElement.yPercent || 50,
     }
+
+    console.log('✏️ Updating element:', {
+      type: selectedElement.type,
+      partId: selectedElement.partId,
+      update,
+    })
 
     if (selectedElement.type === 'text') {
       dispatch(setPartText({
         partId: selectedElement.partId,
         text: update,
       }))
+      console.log('✅ Text updated in Redux')
     } else if (selectedElement.type === 'number') {
       dispatch(setPartNumber({
         partId: selectedElement.partId,
         number: update,
       }))
+      console.log('✅ Number updated in Redux')
     }
   }
 
