@@ -245,13 +245,20 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
     console.log('✅ Number added to canvas')
   }
 
-  // Step 6: Apply UV overlay (optional, for debug)
-  if (uvOverlay) {
+  // Step 6: Apply UV overlay (optional, for debug only)
+  // UV overlays are completely optional and only used for visual debugging
+  if (uvOverlay && typeof uvOverlay === 'string' && uvOverlay.trim() !== '') {
     try {
+      // Try to load UV overlay, but don't fail if it doesn't exist
       const overlayImg = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('UV overlay load timeout'))
+        }, 2000) // 2 second timeout
+        
         fabric.Image.fromURL(
           uvOverlay,
           (img) => {
+            clearTimeout(timeout)
             if (!img) {
               reject(new Error('Failed to load UV overlay'))
               return
@@ -271,7 +278,8 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
         )
       })
     } catch (error) {
-      console.warn('Failed to load UV overlay:', error)
+      // UV overlay is optional, just skip it silently
+      // Don't log as error since it's expected that overlays may not exist
     }
   }
 
