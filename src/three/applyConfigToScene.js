@@ -204,10 +204,24 @@ async function applyConfigToSceneImmediate(scene, partMap, parts, modelId, onPro
       
       // Log what was included in the composition
       if (partCfg.number) {
-        console.log(`  📍 Number "${partCfg.number.value}" at (${partCfg.number.xPercent}%, ${partCfg.number.yPercent}%)`)
+        const numX = partCfg.number.xPercent
+        const numY = partCfg.number.yPercent
+        // Warn if coordinates are out of range
+        if (numX < 0 || numX > 100 || numY < 0 || numY > 100) {
+          console.warn(`  ⚠️ Number "${partCfg.number.value}" has invalid position: (${numX}%, ${numY}%)`)
+        } else {
+          console.log(`  📍 Number "${partCfg.number.value}" at (${numX}%, ${numY}%)`)
+        }
       }
       if (partCfg.text) {
-        console.log(`  📝 Text "${partCfg.text.value}" at (${partCfg.text.xPercent}%, ${partCfg.text.yPercent}%)`)
+        const textX = partCfg.text.xPercent
+        const textY = partCfg.text.yPercent
+        // Warn if coordinates are out of range
+        if (textX < 0 || textX > 100 || textY < 0 || textY > 100) {
+          console.warn(`  ⚠️ Text "${partCfg.text.value}" has invalid position: (${textX}%, ${textY}%)`)
+        } else {
+          console.log(`  📝 Text "${partCfg.text.value}" at (${textX}%, ${textY}%)`)
+        }
       }
     } catch (error) {
       console.error(`Error applying texture to part ${partId}:`, error)

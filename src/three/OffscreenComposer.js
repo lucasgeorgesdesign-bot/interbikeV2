@@ -243,9 +243,20 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
       await waitForFont(textCfg.fontFamily)
     }
     
+    // Clamp xPercent and yPercent to valid range [0, 100]
+    const clampedXPercent = Math.max(0, Math.min(100, textCfg.xPercent || 50))
+    const clampedYPercent = Math.max(0, Math.min(100, textCfg.yPercent || 50))
+    
+    if (textCfg.xPercent !== clampedXPercent || textCfg.yPercent !== clampedYPercent) {
+      console.warn('⚠️ Text position out of range, clamped:', {
+        original: { x: textCfg.xPercent, y: textCfg.yPercent },
+        clamped: { x: clampedXPercent, y: clampedYPercent },
+      })
+    }
+    
     const text = new fabric.Text(textCfg.value, {
-      left: (textCfg.xPercent || 50) * width / 100,
-      top: (textCfg.yPercent || 50) * height / 100,
+      left: clampedXPercent * width / 100,
+      top: clampedYPercent * height / 100,
       fontSize: textCfg.fontSize || 48,
       fill: textCfg.color || '#000000',
       fontFamily: textCfg.fontFamily || 'Arial',
@@ -273,8 +284,18 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
     console.log('🔢 Composing number:', numCfg.value, 'at', numCfg.xPercent, numCfg.yPercent)
     
     // Use UV coordinates if provided, otherwise use default position
-    const xPercent = numCfg.xPercent !== undefined ? numCfg.xPercent : 50
-    const yPercent = numCfg.yPercent !== undefined ? numCfg.yPercent : 50
+    // Clamp to valid range [0, 100]
+    const rawXPercent = numCfg.xPercent !== undefined ? numCfg.xPercent : 50
+    const rawYPercent = numCfg.yPercent !== undefined ? numCfg.yPercent : 50
+    const xPercent = Math.max(0, Math.min(100, rawXPercent))
+    const yPercent = Math.max(0, Math.min(100, rawYPercent))
+    
+    if (rawXPercent !== xPercent || rawYPercent !== yPercent) {
+      console.warn('⚠️ Number position out of range, clamped:', {
+        original: { x: rawXPercent, y: rawYPercent },
+        clamped: { x: xPercent, y: yPercent },
+      })
+    }
     
     // Load font if specified
     if (numCfg.fontFamily && numCfg.fontFamily !== 'Arial') {

@@ -136,10 +136,31 @@ export class UVInteractiveEditor {
         return
       }
 
-      // Convert UV to percentage (0-100)
+      // Log raw UV values for debugging
+      console.log('🔍 Raw UV coordinates:', {
+        uvX: uv.x,
+        uvY: uv.y,
+        uvXType: typeof uv.x,
+        uvYType: typeof uv.y,
+      })
+
+      // Clamp UV coordinates to [0, 1] range (some models have UVs outside this range)
+      // Then convert to percentage (0-100)
+      const clampedUvX = Math.max(0, Math.min(1, uv.x))
+      const clampedUvY = Math.max(0, Math.min(1, uv.y))
+      
       const uvCoords = {
-        xPercent: uv.x * 100,
-        yPercent: (1 - uv.y) * 100, // Flip Y (Three.js UVs are bottom-up)
+        xPercent: clampedUvX * 100,
+        yPercent: (1 - clampedUvY) * 100, // Flip Y (Three.js UVs are bottom-up)
+      }
+
+      // Warn if UVs were out of range
+      if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1) {
+        console.warn('⚠️ UV coordinates out of [0,1] range, clamped:', {
+          original: { x: uv.x, y: uv.y },
+          clamped: { x: clampedUvX, y: clampedUvY },
+          final: uvCoords,
+        })
       }
 
       console.log(`📍 Clicked on ${partId} at UV:`, uvCoords)
