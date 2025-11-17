@@ -28,6 +28,7 @@ export default function NameTab({ sceneManagerRef }) {
   const [strokeEnabled, setStrokeEnabled] = useState(false)
   const [strokeColor, setStrokeColor] = useState('#ffffff')
   const [strokeWidth, setStrokeWidth] = useState(2)
+  const [selectedElement, setSelectedElement] = useState(null)
 
   const handleSave = () => {
     if (!text.trim()) {
@@ -56,6 +57,30 @@ export default function NameTab({ sceneManagerRef }) {
       partId: selectedPartId,
       text: textConfig,
     }))
+
+    // Focus camera and enable editing mode if sceneManagerRef is available
+    if (sceneManagerRef?.current) {
+      sceneManagerRef.current.focusOnPart(selectedPartId)
+      
+      setTimeout(() => {
+        sceneManagerRef.current.enableUVEditing(
+          (clickedPartId, uvCoords) => {
+            if (clickedPartId === selectedPartId) {
+              const currentText = parts[selectedPartId]?.text || textConfig
+              dispatch(setPartText({
+                partId: selectedPartId,
+                text: {
+                  ...currentText,
+                  xPercent: uvCoords.xPercent,
+                  yPercent: uvCoords.yPercent,
+                }
+              }))
+            }
+          },
+          null
+        )
+      }, 1200)
+    }
 
     // Reset form
     setText('')
@@ -187,9 +212,35 @@ export default function NameTab({ sceneManagerRef }) {
       </div>
 
       {existingText && (
-        <div className="existing-text-preview">
+        <div className="existing-text-preview" style={{
+          padding: '12px',
+          backgroundColor: '#f5f5f5',
+          borderRadius: '4px',
+          marginTop: '16px',
+        }}>
           <p>Texte actuel: <strong>{existingText.value}</strong></p>
+          <button
+            className="secondary-button"
+            onClick={() => {
+              setSelectedElement({
+                type: 'text',
+                partId: selectedPartId,
+                ...existingText,
+              })
+            }}
+            style={{ marginTop: '8px' }}
+          >
+            ✏️ Éditer le texte
+          </button>
         </div>
+      )}
+
+      {selectedElement && (
+        <ElementEditor
+          selectedElement={selectedElement}
+          onClose={() => setSelectedElement(null)}
+          sceneManagerRef={sceneManagerRef}
+        />
       )}
     </div>
   )

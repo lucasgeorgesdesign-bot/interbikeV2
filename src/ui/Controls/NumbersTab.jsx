@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setPartNumber } from '../../store/configuratorSlice.js'
 import AddNumberModal from '../Modals/AddNumberModal.jsx'
+import ElementEditor from './ElementEditor.jsx'
 import './Controls.css'
 
 const POSITION_LABELS = {
@@ -17,6 +18,7 @@ export default function NumbersTab({ sceneManagerRef }) {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingMode, setEditingMode] = useState(false)
   const [editingPartId, setEditingPartId] = useState(null)
+  const [selectedElement, setSelectedElement] = useState(null)
 
   const handleAddNumber = (numberConfig) => {
     // Map position to partId
@@ -234,13 +236,31 @@ export default function NumbersTab({ sceneManagerRef }) {
                 </div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   {!isEditing && (
-                    <button
-                      className="secondary-button"
-                      onClick={() => handleEditNumber(positionKey)}
-                      style={{ fontSize: '12px', padding: '4px 8px' }}
-                    >
-                      Modifier position
-                    </button>
+                    <>
+                      <button
+                        className="secondary-button"
+                        onClick={() => {
+                          const currentNumber = parts[partId]?.number
+                          if (currentNumber) {
+                            setSelectedElement({
+                              type: 'number',
+                              partId: partId,
+                              ...currentNumber,
+                            })
+                          }
+                        }}
+                        style={{ fontSize: '12px', padding: '4px 8px' }}
+                      >
+                        ✏️ Éditer
+                      </button>
+                      <button
+                        className="secondary-button"
+                        onClick={() => handleEditNumber(positionKey)}
+                        style={{ fontSize: '12px', padding: '4px 8px' }}
+                      >
+                        📍 Modifier position
+                      </button>
+                    </>
                   )}
                   <button
                     className="remove-button-small"
@@ -259,6 +279,14 @@ export default function NumbersTab({ sceneManagerRef }) {
         <AddNumberModal
           onSave={handleAddNumber}
           onClose={() => setModalOpen(false)}
+        />
+      )}
+
+      {selectedElement && (
+        <ElementEditor
+          selectedElement={selectedElement}
+          onClose={() => setSelectedElement(null)}
+          sceneManagerRef={sceneManagerRef}
         />
       )}
     </div>

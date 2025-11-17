@@ -125,6 +125,15 @@ async function applyConfigToSceneImmediate(scene, partMap, parts, modelId, onPro
       // Even if we have a base texture, we need to compose it with user elements
       const baseTextureUrl = currentDesign?.baseTextures?.[partId]
       
+      console.log(`🎨 Composing texture for ${partId}:`, {
+        hasBaseTexture: !!baseTextureUrl,
+        baseTextureUrl,
+        hasUserTexture: !!partCfg.textureUrl,
+        hasNumber: !!partCfg.number,
+        hasText: !!partCfg.text,
+        hasLogo: !!partCfg.logoId || !!partCfg.imageUrl,
+      })
+      
       // If we have a base texture, we'll use it as background in the composer
       // Otherwise, compose normally
       const uvOverlay = modelLoader.getUVOverlayPath(modelId, partId)
@@ -134,6 +143,8 @@ async function applyConfigToSceneImmediate(scene, partMap, parts, modelId, onPro
         ...partCfg,
         // If base texture exists, use it as textureUrl for the composer
         textureUrl: baseTextureUrl || partCfg.textureUrl,
+        // Ensure color is set (default white if no texture)
+        color: partCfg.color || (baseTextureUrl ? undefined : '#ffffff'),
       }
 
       // Compose texture (will include base texture + user elements)

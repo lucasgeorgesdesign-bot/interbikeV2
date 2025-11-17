@@ -91,15 +91,27 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
   // Step 2: Draw background texture/image if any (base texture from design or user image)
   const backgroundImageUrl = partCfg.textureUrl || partCfg.imageUrl
   if (backgroundImageUrl) {
+    console.log('🖼️ Loading background texture:', backgroundImageUrl)
     try {
       const bgImg = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('Background image load timeout'))
+        }, 5000)
+        
         fabric.Image.fromURL(
           backgroundImageUrl,
           (img) => {
+            clearTimeout(timeout)
             if (!img) {
               reject(new Error('Failed to load background image'))
               return
             }
+            
+            console.log('✅ Background image loaded:', {
+              width: img.width,
+              height: img.height,
+              url: backgroundImageUrl
+            })
             
             // Apply repeat if specified
             if (partCfg.repeat) {
@@ -117,25 +129,32 @@ export async function composePart(partCfg, uvOverlay = null, options = {}) {
                 }
               }
             } else {
-              // Single image, scale to fit
+              // Single image, scale to fit canvas
               img.set({
-                left: (partCfg.offset?.[0] || 0),
-                top: (partCfg.offset?.[1] || 0),
+                left: 0,
+                top: 0,
                 scaleX: width / (img.width || width),
                 scaleY: height / (img.height || height),
+                originX: 'left',
+                originY: 'top',
               })
               canvas.add(img)
+              canvas.sendToBack(img) // Ensure background is behind everything
             }
             
+            canvas.renderAll()
             resolve(img)
           },
           { crossOrigin: 'anonymous' }
         )
       })
-      canvas.renderAll()
+      console.log('✅ Background texture added to canvas')
     } catch (error) {
-      console.warn('Failed to load background image:', error)
+      console.error('❌ Failed to load background image:', error, backgroundImageUrl)
+      // Don't fail completely, continue without background
     }
+  } else {
+    console.log('ℹ️ No background texture for this part')
   }
 
   // Step 3: Draw logo if provided (user-uploaded logo, not base texture)
