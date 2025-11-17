@@ -185,11 +185,26 @@ export class ModelLoader {
    */
   async loadModelConfig(modelId) {
     try {
-      const response = await fetch(`/assets/models/${modelId}.config.json`)
-      if (!response.ok) throw new Error('Config not found')
-      return await response.json()
+      const configPath = `/assets/models/${modelId}.config.json`
+      console.log(`📋 Loading model config from: ${configPath}`)
+      
+      const response = await fetch(configPath)
+      if (!response.ok) {
+        throw new Error(`Config not found: ${response.status} ${response.statusText}`)
+      }
+      
+      const config = await response.json()
+      console.log('✅ Model config loaded:', {
+        modelId: config.modelId,
+        name: config.name,
+        zonesCount: config.zones?.length || 0,
+        designsCount: config.designs?.length || 0,
+        designs: config.designs?.map(d => ({ id: d.id, name: d.name, baseTextures: Object.keys(d.baseTextures || {}) })) || [],
+      })
+      
+      return config
     } catch (error) {
-      console.warn('Config not found, using defaults:', error)
+      console.error('❌ Failed to load model config:', error)
       return null
     }
   }
